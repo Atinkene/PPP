@@ -2,44 +2,54 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+// Modèle: User
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use Notifiable, HasApiTokens;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'id', 'email', 'nom', 'prenom', 'sexe', 'date_naissance', 'cin',
+        'lieu_naissance', 'nationalite', 'adresse_postale', 'numero_telephone',
+        'login', 'password',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password', 'remember_token'];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    public function patient()
+    {
+        return $this->hasOne(Patient::class, 'id_user');
+    }
+
+    public function professionnelSante()
+    {
+        return $this->hasOne(ProfessionnelSante::class, 'id_user');
+    }
+
+    public function acteurNonMedical()
+    {
+        return $this->hasOne(ActeurNonMedical::class, 'id_user');
+    }
+
+    public function etablissements()
+    {
+        return $this->hasMany(Etablissement::class, 'directeur');
+    }
+
+    public function servicesHospitaliers()
+    {
+        return $this->hasMany(ServiceHospitalier::class, 'chef_service');
+    }
+
+    public function contactsUrgence()
+    {
+        return $this->hasMany(ContactUrgence::class, 'id_user_contact');
+    }
 }

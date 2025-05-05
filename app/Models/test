@@ -1,0 +1,1013 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+
+// Modèle: User
+class User extends Authenticatable
+{
+    use Notifiable, HasApiTokens;
+
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = [
+        'id', 'email', 'nom', 'prenom', 'sexe', 'date_naissance', 'cin',
+        'lieu_naissance', 'nationalite', 'adresse_postale', 'numero_telephone',
+        'login', 'password',
+    ];
+
+    protected $hidden = ['password', 'remember_token'];
+
+    public function patient()
+    {
+        return $this->hasOne(Patient::class, 'id_user');
+    }
+
+    public function professionnelSante()
+    {
+        return $this->hasOne(ProfessionnelSante::class, 'id_user');
+    }
+
+    public function acteurNonMedical()
+    {
+        return $this->hasOne(ActeurNonMedical::class, 'id_user');
+    }
+
+    public function etablissements()
+    {
+        return $this->hasMany(Etablissement::class, 'directeur');
+    }
+
+    public function servicesHospitaliers()
+    {
+        return $this->hasMany(ServiceHospitalier::class, 'chef_service');
+    }
+
+    public function contactsUrgence()
+    {
+        return $this->hasMany(ContactUrgence::class, 'id_user_contact');
+    }
+}
+
+// Modèle: Etablissement
+class Etablissement extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'nom', 'adresse', 'type', 'contact', 'directeur'];
+
+    public function directeur()
+    {
+        return $this->belongsTo(User::class, 'directeur');
+    }
+
+    public function servicesHospitaliers()
+    {
+        return $this->hasMany(ServiceHospitalier::class, 'id_etablissement');
+    }
+
+    public function dossiersPatients()
+    {
+        return $this->hasMany(DossierPatient::class, 'id_etablissement');
+    }
+
+    public function rendezVous()
+    {
+        return $this->hasMany(RendezVous::class, 'id_etablissement');
+    }
+}
+
+// Modèle: ServiceHospitalier
+class ServiceHospitalier extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_etablissement', 'nom', 'chef_service'];
+
+    public function etablissement()
+    {
+        return $this->belongsTo(Etablissement::class, 'id_etablissement');
+    }
+
+    public function chefService()
+    {
+        return $this->belongsTo(User::class, 'chef_service');
+    }
+
+    public function professionnelsSante()
+    {
+        return $this->hasMany(ProfessionnelSante::class, 'id_service');
+    }
+
+    public function acteursNonMedicaux()
+    {
+        return $this->hasMany(ActeurNonMedical::class, 'id_service');
+    }
+
+    public function admissions()
+    {
+        return $this->hasMany(Admission::class, 'id_service');
+    }
+
+    public function rendezVous()
+    {
+        return $this->hasMany(RendezVous::class, 'id_service');
+    }
+}
+
+// Modèle: Patient
+class Patient extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_user', 'groupe_sanguin'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user');
+    }
+
+    public function dossiersPatients()
+    {
+        return $this->hasMany(DossierPatient::class, 'id_patient');
+    }
+
+    public function antecedents()
+    {
+        return $this->hasMany(Antecedent::class, 'id_patient');
+    }
+
+    public function contactsUrgence()
+    {
+        return $this->hasMany(ContactUrgence::class, 'id_patient');
+    }
+
+    public function rendezVous()
+    {
+        return $this->hasMany(RendezVous::class, 'id_patient');
+    }
+}
+
+// Modèle: ProfessionnelSante
+class ProfessionnelSante extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_user', 'id_service', 'numero_rpps', 'type', 'specialite'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user');
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(ServiceHospitalier::class, 'id_service');
+    }
+
+    public function consultations()
+    {
+        return $this->hasMany(Consultation::class, 'id_professionnel');
+    }
+
+    public function comptesRendusSortie()
+    {
+        return $this->hasMany(CompteRenduSortie::class, 'id_professionnel');
+    }
+
+    public function examensImagerie()
+    {
+        return $this->hasMany(ExamenImagerie::class, 'id_professionnel');
+    }
+
+    public function observationsInfirmieres()
+    {
+        return $this->hasMany(ObservationInfirmiere::class, 'id_professionnel');
+    }
+
+    public function administrationsMedicaments()
+    {
+        return $this->hasMany(AdministrationMedicament::class, 'id_professionnel');
+    }
+
+    public function rendezVous()
+    {
+        return $this->hasMany(RendezVous::class, 'id_professionnel');
+    }
+}
+
+// Modèle: ActeurNonMedical
+class ActeurNonMedical extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_user', 'id_service', 'role', 'numero_adeli'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user');
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(ServiceHospitalier::class, 'id_service');
+    }
+
+    public function evaluationsPsychologiques()
+    {
+        return $this->hasMany(EvaluationPsychologique::class, 'id_acteur');
+    }
+}
+
+// Modèle: DossierPatient
+class DossierPatient extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_patient', 'id_etablissement'];
+
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class, 'id_patient');
+    }
+
+    public function etablissement()
+    {
+        return $this->belongsTo(Etablissement::class, 'id_etablissement');
+    }
+
+    public function dossierAdministratif()
+    {
+        return $this->hasOne(DossierAdministratif::class, 'id_dossier');
+    }
+
+    public function dossierAdmissionSejour()
+    {
+        return $this->hasOne(DossierAdmissionSejour::class, 'id_dossier');
+    }
+
+    public function dossierSoinsMedicaux()
+    {
+        return $this->hasOne(DossierSoinsMedicaux::class, 'id_dossier');
+    }
+
+    public function dossierSortieSuivi()
+    {
+        return $this->hasOne(DossierSortieSuivi::class, 'id_dossier');
+    }
+
+    public function dossierExamensComplementaires()
+    {
+        return $this->hasOne(DossierExamenComplementaire::class, 'id_dossier');
+    }
+
+    public function dossierSoinsInfirmiers()
+    {
+        return $this->hasOne(DossierSoinsInfirmier::class, 'id_dossier');
+    }
+
+    public function dossierChirurgieAnesthesie()
+    {
+        return $this->hasOne(DossierChirurgieAnesthesie::class, 'id_dossier');
+    }
+
+    public function dossierPsychoSociaux()
+    {
+        return $this->hasOne(DossierPsychoSociaux::class, 'id_dossier');
+    }
+}
+
+// Modèle: Antecedent
+class Antecedent extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_patient', 'lien_parente', 'maladie', 'age_apparition', 'deces'];
+
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class, 'id_patient');
+    }
+
+    public function allergies()
+    {
+        return $this->hasMany(Allergie::class, 'id_antecedent');
+    }
+
+    public function maladiesChroniques()
+    {
+        return $this->hasMany(MaladieChronique::class, 'id_antecedent');
+    }
+
+    public function traitementsLongueDuree()
+    {
+        return $this->hasMany(TraitementLongueDuree::class, 'id_antecedent');
+    }
+
+    public function operations()
+    {
+        return $this->hasMany(Operation::class, 'id_antecedent');
+    }
+
+    public function vaccinations()
+    {
+        return $this->hasMany(Vaccination::class, 'id_antecedent');
+    }
+}
+
+// Modèle: Allergie
+class Allergie extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_antecedent', 'nom'];
+
+    public function antecedent()
+    {
+        return $this->belongsTo(Antecedent::class, 'id_antecedent');
+    }
+}
+
+// Modèle: Contact
+class Contact extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'adresse_postale', 'numero_telephone', 'email'];
+
+    public function dossierAdministratif()
+    {
+        return $this->hasOne(DossierAdministratif::class, 'id_contact');
+    }
+}
+
+// Modèle: Assurance
+class Assurance extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'numero_securite_social', 'organisme_assurance_sante', 'prise_en_charge'];
+
+    public function dossierAdministratif()
+    {
+        return $this->hasOne(DossierAdministratif::class, 'id_assurance');
+    }
+}
+
+// Modèle: Consentement
+class Consentement extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'type', 'statut', 'date_autorisation'];
+
+    public function dossierAdministratif()
+    {
+        return $this->hasOne(DossierAdministratif::class, 'id_consentement');
+    }
+}
+
+// Modèle: DossierAdministratif
+class DossierAdministratif extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_dossier', 'id_contact', 'id_assurance', 'id_consentement'];
+
+    public function dossier()
+    {
+        return $this->belongsTo(DossierPatient::class, 'id_dossier');
+    }
+
+    public function contact()
+    {
+        return $this->belongsTo(Contact::class, 'id_contact');
+    }
+
+    public function assurance()
+    {
+        return $this->belongsTo(Assurance::class, 'id_assurance');
+    }
+
+    public function consentement()
+    {
+        return $this->belongsTo(Consentement::class, 'id_consentement');
+    }
+}
+
+// Modèle: DossierAdmissionSejour
+class DossierAdmissionSejour extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_dossier'];
+
+    public function dossier()
+    {
+        return $this->belongsTo(DossierPatient::class, 'id_dossier');
+    }
+
+    public function admissions()
+    {
+        return $this->hasMany(Admission::class, 'id_dossier_admission');
+    }
+
+    public function comptesRendusHospitalisation()
+    {
+        return $this->hasMany(CompteRenduHospitalisation::class, 'id_dossier_admission');
+    }
+
+    public function suivisHospitaliers()
+    {
+        return $this->hasMany(SuiviHospitalier::class, 'id_dossier_admission');
+    }
+}
+
+// Modèle: Admission
+class Admission extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_dossier_admission', 'motif', 'id_service', 'date'];
+
+    public function dossierAdmission()
+    {
+        return $this->belongsTo(DossierAdmissionSejour::class, 'id_dossier_admission');
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(ServiceHospitalier::class, 'id_service');
+    }
+}
+
+// Modèle: CompteRenduHospitalisation
+class CompteRenduHospitalisation extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_dossier_admission', 'diagnostic_principal', 'diagnostics_associes'];
+
+    public function dossierAdmission()
+    {
+        return $this->belongsTo(DossierAdmissionSejour::class, 'id_dossier_admission');
+    }
+}
+
+// Modèle: DossierSoinsMedicaux
+class DossierSoinsMedicaux extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_dossier'];
+
+    public function dossier()
+    {
+        return $this->belongsTo(DossierPatient::class, 'id_dossier');
+    }
+
+    public function consultations()
+    {
+        return $this->hasMany(Consultation::class, 'id_dossier_soins');
+    }
+
+    public function traitements()
+    {
+        return $this->hasMany(Traitement::class, 'id_dossier_soins');
+    }
+}
+
+// Modèle: Consultation
+class Consultation extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = [
+        'id', 'id_dossier_soins', 'compte_rendu', 'examen_clinique',
+        'symptomes', 'diagnostic', 'recommandations', 'id_professionnel'
+    ];
+
+    public function dossierSoins()
+    {
+        return $this->belongsTo(DossierSoinsMedicaux::class, 'id_dossier_soins');
+    }
+
+    public function professionnel()
+    {
+        return $this->belongsTo(ProfessionnelSante::class, 'id_professionnel');
+    }
+
+    public function symptomes()
+    {
+        return $this->hasMany(Symptome::class, 'id_consultation');
+    }
+}
+
+// Modèle: Traitement
+class Traitement extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_dossier_soins', 'type', 'date', 'description'];
+
+    public function dossierSoins()
+    {
+        return $this->belongsTo(DossierSoinsMedicaux::class, 'id_dossier_soins');
+    }
+
+    public function medicaments()
+    {
+        return $this->hasMany(Medicament::class, 'id_traitement');
+    }
+
+    public function effetsSecondaires()
+    {
+        return $this->hasMany(EffetSecondaire::class, 'id_traitement');
+    }
+}
+
+// Modèle: Medicament
+class Medicament extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_traitement', 'nom', 'posologie', 'duree'];
+
+    public function traitement()
+    {
+        return $this->belongsTo(Traitement::class, 'id_traitement');
+    }
+
+    public function administrations()
+    {
+        return $this->hasMany(AdministrationMedicament::class, 'id_medicament');
+    }
+
+    public function effetsSecondaires()
+    {
+        return $this->hasMany(EffetSecondaire::class, 'id_medicament');
+    }
+}
+
+// Modèle: RendezVous
+class RendezVous extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = [
+        'id', 'id_patient', 'id_professionnel', 'id_service',
+        'id_etablissement', 'date', 'type', 'statut'
+    ];
+
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class, 'id_patient');
+    }
+
+    public function professionnel()
+    {
+        return $this->belongsTo(ProfessionnelSante::class, 'id_professionnel');
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(ServiceHospitalier::class, 'id_service');
+    }
+
+    public function etablissement()
+    {
+        return $this->belongsTo(Etablissement::class, 'id_etablissement');
+    }
+}
+
+// Modèle: DossierSortieSuivi
+class DossierSortieSuivi extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_dossier'];
+
+    public function dossier()
+    {
+        return $this->belongsTo(DossierPatient::class, 'id_dossier');
+    }
+
+    public function comptesRendusSortie()
+    {
+        return $this->hasMany(CompteRenduSortie::class, 'id_dossier_sortie');
+    }
+}
+
+// Modèle: CompteRenduSortie
+class CompteRenduSortie extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = [
+        'id', 'id_dossier_sortie', 'date', 'instructions',
+        'recommandations', 'id_professionnel'
+    ];
+
+    public function dossierSortie()
+    {
+        return $this->belongsTo(DossierSortieSuivi::class, 'id_dossier_sortie');
+    }
+
+    public function professionnel()
+    {
+        return $this->belongsTo(ProfessionnelSante::class, 'id_professionnel');
+    }
+}
+
+// Modèle: FailedJob
+class FailedJob extends Model
+{
+    protected $fillable = ['uuid', 'connection', 'queue', 'payload', 'exception', 'failed_at'];
+
+    public $timestamps = false;
+}
+
+// Modèle: PersonalAccessToken
+class PersonalAccessToken extends Model
+{
+    protected $fillable = [
+        'tokenable_type', 'tokenable_id', 'name', 'token',
+        'abilities', 'last_used_at', 'expires_at'
+    ];
+}
+
+// Modèle: PasswordResetToken
+class PasswordResetToken extends Model
+{
+    protected $primaryKey = 'email';
+    public $incrementing = false;
+
+    protected $fillable = ['email', 'token', 'created_at'];
+
+    public $timestamps = false;
+}
+
+// Modèle: Migration
+class Migration extends Model
+{
+    protected $fillable = ['migration', 'batch'];
+}
+
+// Modèle: DossierExamenComplementaire
+class DossierExamenComplementaire extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_dossier'];
+
+    public function dossier()
+    {
+        return $this->belongsTo(DossierPatient::class, 'id_dossier');
+    }
+
+    public function examensImagerie()
+    {
+        return $this->hasMany(ExamenImagerie::class, 'id_dossier_examen');
+    }
+}
+
+// Modèle: ExamenImagerie
+class ExamenImagerie extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = [
+        'id', 'id_dossier_examen', 'type', 'resultat', 'dicom_instance_id',
+        'study_id', 'patient_id', 'url', 'id_professionnel'
+    ];
+
+    public function dossierExamen()
+    {
+        return $this->belongsTo(DossierExamenComplementaire::class, 'id_dossier_examen');
+    }
+
+    public function professionnel()
+    {
+        return $this->belongsTo(ProfessionnelSante::class, 'id_professionnel');
+    }
+
+    public function imagesDicom()
+    {
+        return $this->hasMany(ImageDicom::class, 'id_examen_imagerie');
+    }
+}
+
+// Modèle: ImageDicom
+class ImageDicom extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = [
+        'id', 'id_examen_imagerie', 'orthanc_instance_id',
+        'study_id', 'patient_id', 'url', 'type'
+    ];
+
+    public function examenImagerie()
+    {
+        return $this->belongsTo(ExamenImagerie::class, 'id_examen_imagerie');
+    }
+}
+
+// Modèle: DossierSoinsInfirmier
+class DossierSoinsInfirmier extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_dossier'];
+
+    public function dossier()
+    {
+        return $this->belongsTo(DossierPatient::class, 'id_dossier');
+    }
+
+    public function observationsInfirmieres()
+    {
+        return $this->hasMany(ObservationInfirmiere::class, 'id_dossier_infirmier');
+    }
+
+    public function administrationsMedicaments()
+    {
+        return $this->hasMany(AdministrationMedicament::class, 'id_dossier_infirmier');
+    }
+}
+
+// Modèle: ObservationInfirmiere
+class ObservationInfirmiere extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_dossier_infirmier', 'date', 'etat_general', 'id_professionnel'];
+
+    public function dossierInfirmier()
+    {
+        return $this->belongsTo(DossierSoinsInfirmier::class, 'id_dossier_infirmier');
+    }
+
+    public function professionnel()
+    {
+        return $this->belongsTo(ProfessionnelSante::class, 'id_professionnel');
+    }
+}
+
+// Modèle: AdministrationMedicament
+class AdministrationMedicament extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = [
+        'id', 'id_medicament', 'id_dossier_infirmier',
+        'id_professionnel', 'date_administration', 'dose'
+    ];
+
+    public function medicament()
+    {
+        return $this->belongsTo(Medicament::class, 'id_medicament');
+    }
+
+    public function dossierInfirmier()
+    {
+        return $this->belongsTo(DossierSoinsInfirmier::class, 'id_dossier_infirmier');
+    }
+
+    public function professionnel()
+    {
+        return $this->belongsTo(ProfessionnelSante::class, 'id_professionnel');
+    }
+}
+
+// Modèle: EffetSecondaire
+class EffetSecondaire extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_traitement', 'id_medicament', 'nom', 'date'];
+
+    public function traitement()
+    {
+        return $this->belongsTo(Traitement::class, 'id_traitement');
+    }
+
+    public function medicament()
+    {
+        return $this->belongsTo(Medicament::class, 'id_medicament');
+    }
+}
+
+// Modèle: Vaccination
+class Vaccination extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_antecedent', 'nom', 'date'];
+
+    public function antecedent()
+    {
+        return $this->belongsTo(Antecedent::class, 'id_antecedent');
+    }
+}
+
+// Modèle: Operation
+class Operation extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_antecedent', 'nom', 'date'];
+
+    public function antecedent()
+    {
+        return $this->belongsTo(Antecedent::class, 'id_antecedent');
+    }
+}
+
+// Modèle: TraitementLongueDuree
+class TraitementLongueDuree extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_antecedent', 'nom'];
+
+    public function antecedent()
+    {
+        return $this->belongsTo(Antecedent::class, 'id_antecedent');
+    }
+}
+
+// Modèle: MaladieChronique
+class MaladieChronique extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_antecedent', 'nom'];
+
+    public function antecedent()
+    {
+        return $this->belongsTo(Antecedent::class, 'id_antecedent');
+    }
+}
+
+// Modèle: ContactUrgence
+class ContactUrgence extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = [
+        'id', 'id_patient', 'lien_parente', 'cause',
+        'date', 'est_joint', 'id_user_contact'
+    ];
+
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class, 'id_patient');
+    }
+
+    public function userContact()
+    {
+        return $this->belongsTo(User::class, 'id_user_contact');
+    }
+}
+
+// Modèle: DossierChirurgieAnesthesie
+class DossierChirurgieAnesthesie extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_dossier'];
+
+    public function dossier()
+    {
+        return $this->belongsTo(DossierPatient::class, 'id_dossier');
+    }
+
+    public function fichesPreoperatoires()
+    {
+        return $this->hasMany(FichePreoperatoire::class, 'id_dossier_chirurgie');
+    }
+}
+
+// Modèle: FichePreoperatoire
+class FichePreoperatoire extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_dossier_chirurgie', 'date', 'nom'];
+
+    public function dossierChirurgie()
+    {
+        return $this->belongsTo(DossierChirurgieAnesthesie::class, 'id_dossier_chirurgie');
+    }
+}
+
+// Modèle: DossierPsychoSociaux
+class DossierPsychoSociaux extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_dossier'];
+
+    public function dossier()
+    {
+        return $this->belongsTo(DossierPatient::class, 'id_dossier');
+    }
+
+    public function evaluationsPsychologiques()
+    {
+        return $this->hasMany(EvaluationPsychologique::class, 'id_dossier_psycho');
+    }
+}
+
+// Modèle: EvaluationPsychologique
+class EvaluationPsychologique extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_dossier_psycho', 'date', 'diagnostic', 'suivi', 'id_acteur'];
+
+    public function dossierPsycho()
+    {
+        return $this->belongsTo(DossierPsychoSociaux::class, 'id_dossier_psycho');
+    }
+
+    public function acteur()
+    {
+        return $this->belongsTo(ActeurNonMedical::class, 'id_acteur');
+    }
+}
+
+// Modèle: SuiviHospitalier
+class SuiviHospitalier extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = [
+        'id', 'id_dossier_admission', 'observation_medicale',
+        'evolution_clinique', 'evenements_marquants'
+    ];
+
+    public function dossierAdmission()
+    {
+        return $this->belongsTo(DossierAdmissionSejour::class, 'id_dossier_admission');
+    }
+}
+
+// Modèle: Symptome
+class Symptome extends Model
+{
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'id_consultation', 'nom', 'date'];
+
+    public function consultation()
+    {
+        return $this->belongsTo(Consultation::class, 'id_consultation');
+    }
+}
