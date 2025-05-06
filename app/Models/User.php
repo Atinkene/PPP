@@ -18,7 +18,7 @@ class User extends Authenticatable
     protected $fillable = [
         'id', 'email', 'nom', 'prenom', 'sexe', 'date_naissance', 'cin',
         'lieu_naissance', 'nationalite', 'adresse_postale', 'numero_telephone',
-        'login', 'password',
+        'login', 'password','role',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -52,4 +52,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(ContactUrgence::class, 'id_user_contact');
     }
+    
 }

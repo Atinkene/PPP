@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\InscriptionController;
 use App\Http\Controllers\UtilisateurController;
 use App\Http\Controllers\AnesthesisteController;
 use App\Http\Controllers\AssistantMedicalController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\PsychologueController;
 use Illuminate\Support\Facades\Route;
 
 // Routes pour l'authentification
+Route::post('/inscription', [InscriptionController::class, 'inscrire']);
 Route::post('/connexion', [AuthController::class, 'connecter']);
 Route::post('/deconnexion', [AuthController::class, 'deconnecter'])->middleware('auth:sanctum');
 

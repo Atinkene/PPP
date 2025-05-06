@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('cin')->unique();
             $table->string('lieu_naissance');
             $table->string('nationalite');
+            $table->string('role')->nullable();
             $table->text('adresse_postale')->nullable();
             $table->string('numero_telephone')->unique()->nullable();
             $table->string('login')->unique()->nullable();
@@ -166,7 +167,7 @@ return new class extends Migration
             $table->foreign('id_contact')->references('id')->on('contacts')->onDelete('cascade');
             $table->foreign('id_assurance')->references('id')->on('assurances')->onDelete('cascade');
             $table->foreign('id_consentement')->references('id')->on('consentements')->onDelete('cascade');
-            $table->index(['id_dossier', 'id_contact', 'id_assurance', 'id_consentement']);
+            $table->index(['id_dossier', 'id_contact', 'id_assurance', 'id_consentement'],  'dossier_admin_idx');
         });
 
         // Table: dossiers_admission_sejour
@@ -290,44 +291,7 @@ return new class extends Migration
             $table->index(['id_dossier_sortie', 'id_professionnel']);
         });
 
-        // Table: failed_jobs
-        Schema::create('failed_jobs', function (Blueprint $table) {
-            $table->id();
-            $table->string('uuid')->unique();
-            $table->text('connection');
-            $table->text('queue');
-            $table->longText('payload');
-            $table->longText('exception');
-            $table->timestamp('failed_at')->useCurrent();
-        });
-
-        // Table: personal_access_tokens
-        Schema::create('personal_access_tokens', function (Blueprint $table) {
-            $table->id();
-            $table->string('tokenable_type');
-            $table->unsignedBigInteger('tokenable_id');
-            $table->string('name');
-            $table->string('token', 64)->unique();
-            $table->text('abilities')->nullable();
-            $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
-            $table->timestamps();
-            $table->index(['tokenable_type', 'tokenable_id']);
-        });
-
-        // Table: password_reset_tokens
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
-
-        // Table: migrations
-        Schema::create('migrations', function (Blueprint $table) {
-            $table->id();
-            $table->string('migration');
-            $table->integer('batch');
-        });
+      
 
         // Table: dossiers_examens_complementaires
         Schema::create('dossiers_examens_complementaires', function (Blueprint $table) {
@@ -388,7 +352,7 @@ return new class extends Migration
             $table->timestamps();
             $table->foreign('id_dossier_infirmier')->references('id')->on('dossiers_soins_infirmiers')->onDelete('cascade');
             $table->foreign('id_professionnel')->references('id')->on('professionnels_sante')->onDelete('set null');
-            $table->index(['id_dossier_infirmier', 'id_professionnel']);
+            $table->index(['id_dossier_infirmier', 'id_professionnel'], 'InfPof_idx');
         });
 
         // Table: administrations_medicaments
@@ -467,7 +431,7 @@ return new class extends Migration
             $table->timestamps();
             $table->foreign('id_patient')->references('id')->on('patients')->onDelete('cascade');
             $table->foreign('id_user_contact')->references('id')->on('users')->onDelete('set null');
-            $table->index(['id_patient', 'id_user_contact']);
+            $table->index(['id_patient', 'id_user_contact'],'PatCont_idx');
         });
 
         // Table: dossiers_chirurgie_anesthesie
@@ -510,7 +474,7 @@ return new class extends Migration
             $table->timestamps();
             $table->foreign('id_dossier_psycho')->references('id')->on('dossiers_psycho_sociaux')->onDelete('cascade');
             $table->foreign('id_acteur')->references('id')->on('acteurs_non_medicaux')->onDelete('set null');
-            $table->index(['id_dossier_psycho', 'id_acteur']);
+            $table->index(['id_dossier_psycho', 'id_acteur'],'DosPsyAct_idx');
         });
 
         // Table: suivis_hospitaliers
