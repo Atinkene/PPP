@@ -15,10 +15,13 @@ use App\Http\Controllers\PersonnelAdministratifController;
 use App\Http\Controllers\RadiologueController;
 use App\Http\Controllers\PsychologueController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OrthancController;
+use Illuminate\Http\Request;
+
 
 // Routes pour l'authentification
 Route::post('/inscription', [InscriptionController::class, 'inscrire']);
-Route::post('/connexion', [AuthController::class, 'connecter']);
+Route::post('/connexion', [AuthController::class, 'connecter'])->name('connexion');
 Route::post('/deconnexion', [AuthController::class, 'deconnecter'])->middleware('auth:sanctum');
 
 // Routes protégées par authentification
@@ -27,9 +30,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/donnees-personnelles', [UtilisateurController::class, 'consulterDonneesPersonnelles']);
     Route::put('/donnees-personnelles', [UtilisateurController::class, 'modifierDonneesPersonnelles']);
     Route::get('/rendez-vous', [UtilisateurController::class, 'consulterRendezVous']);
+    Route::get('/etablissements', [UtilisateurController::class, 'getEtablissements']);
 
     // Routes pour Anesthésiste
-    Route::middleware('role:anesthesiste')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::get('/patients/{idPatient}/antecedents', [AnesthesisteController::class, 'consulterAntecedents']);
         Route::get('/patients/{idPatient}/examens-preoperatoires', [AnesthesisteController::class, 'consulterExamensPreoperatoires']);
         Route::post('/patients/{idPatient}/evaluation-anesthesique', [AnesthesisteController::class, 'enregistrerEvaluationAnesthesique']);
@@ -39,7 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Routes pour Assistant Médical
-    Route::middleware('role:assistant_medical')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::post('/rendez-vous', [AssistantMedicalController::class, 'planifierRendezVous']);
         Route::get('/rendez-vous-planifies', [AssistantMedicalController::class, 'consulterRendezVousPlanifies']);
         Route::put('/rendez-vous/{id}/annuler', [AssistantMedicalController::class, 'annulerRendezVous']);
@@ -47,7 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Routes pour Patient
-    Route::middleware('role:patient')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::post('/rendez-vous', [PatientController::class, 'prendreRendezVous']);
         Route::put('/rendez-vous/{id}/annuler', [PatientController::class, 'annulerRendezVous']);
         Route::get('/donnees-personnelles', [PatientController::class, 'consulterDonneesPersonnelles']);
@@ -61,10 +65,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/copie-dossier-medical', [PatientController::class, 'demanderCopieDossier']);
         Route::post('/signaler-erreur', [PatientController::class, 'signalerErreur']);
         Route::post('/evaluer-prise-en-charge', [PatientController::class, 'evaluerPriseEnCharge']);
+        Route::get('/dossier/{id_user}', [PatientController::class, 'getDossierActifPatient']);
+        Route::put('/rendez-vous/{idrv}', [PatientController::class, 'mettreAJourRendezVous']);
     });
 
     // Routes pour Biologiste
-    Route::middleware('role:biologiste')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::get('/demandes-examen', [BiologisteController::class, 'consulterDemandesExamen']);
         Route::get('/patients/{idPatient}/antecedents', [BiologisteController::class, 'consulterAntecedents']);
         Route::post('/examens/{idExamen}/resultat-biologique', [BiologisteController::class, 'enregistrerResultatBiologique']);
@@ -73,7 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Routes pour Chirurgien
-    Route::middleware('role:chirurgien')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::get('/patients/{idPatient}/antecedents', [ChirurgienController::class, 'consulterAntecedents']);
         Route::get('/patients/{idPatient}/examens-preoperatoires', [ChirurgienController::class, 'consulterExamensPreoperatoires']);
         Route::post('/patients/{idPatient}/fiche-preoperatoire', [ChirurgienController::class, 'enregistrerFichePreoperatoire']);
@@ -87,7 +93,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Routes pour Infirmier
-    Route::middleware('role:infirmier')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::post('/dossiers-admission/{idDossierAdmission}/suivi-hospitalier', [InfirmierController::class, 'mettreAJourSuiviHospitalier']);
         Route::put('/rendez-vous/{id}/annuler', [InfirmierController::class, 'annulerRendezVous']);
         Route::get('/rendez-vous', [InfirmierController::class, 'consulterRendezVous']);
@@ -102,7 +108,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Routes pour Kinésithérapeute
-    Route::middleware('role:kinesitherapeute')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::get('/patients/{idPatient}/prescriptions', [KinesitherapeuteController::class, 'consulterPrescriptions']);
         Route::get('/patients/{idPatient}/etat-post-operatoire', [KinesitherapeuteController::class, 'consulterEtatPostOperatoire']);
         Route::post('/patients/{idPatient}/seance-reeducation', [KinesitherapeuteController::class, 'enregistrerSeanceReeducation']);
@@ -111,7 +117,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Routes pour Médecin
-    Route::middleware('role:medecin')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::post('/patients/{idPatient}/compte-rendu-consultation', [MedecinController::class, 'redigerCompteRenduConsultation']);
         Route::post('/patients/{idPatient}/transfert-service', [MedecinController::class, 'enregistrerTransfertService']);
         Route::post('/examens/{idExamen}/interpretation', [MedecinController::class, 'interpreterResultatExamen']);
@@ -126,7 +132,11 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Routes pour Personnel Administratif
-    Route::middleware('role:personnel_administratif')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/patients/search', [PersonnelAdministratifController::class, 'searchPatients']);
+        Route::get('/patients/{id}/details', [PersonnelAdministratifController::class, 'getPatientDetails']);
+        Route::put('/patients/{id}/donnees-personnelles', [PersonnelAdministratifController::class, 'updatePersonalInfo']);
+        Route::get('/dossiers/{id}/sub-elements', [PersonnelAdministratifController::class, 'getDossierSubElements']);
         Route::put('/admissions/{idAdmission}/service-destination', [PersonnelAdministratifController::class, 'mettreAJourServiceDestination']);
         Route::post('/donnees-personnelles', [PersonnelAdministratifController::class, 'enregistrerDonneesPersonnelles']);
         Route::post('/donnees-assurance', [PersonnelAdministratifController::class, 'enregistrerDonneesAssurance']);
@@ -138,7 +148,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Routes pour Radiologue
-    Route::middleware('role:radiologue')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::get('/demandes-examen', [RadiologueController::class, 'consulterDemandesExamen']);
         Route::get('/patients/{idPatient}/antecedents', [RadiologueController::class, 'consulterAntecedents']);
         Route::post('/examens/{idExamen}/resultat-imagerie', [RadiologueController::class, 'enregistrerResultatImagerie']);
@@ -147,7 +157,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Routes pour Psychologue
-    Route::middleware('role:psychologue')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::get('/patients/{idPatient}/antecedents-medicaux', [PsychologueController::class, 'consulterAntecedentsMedicaux']);
         Route::get('/patients/{idPatient}/donnees-sociales', [PsychologueController::class, 'consulterDonneesSociales']);
         Route::post('/patients/{idPatient}/diagnostic-psychologique', [PsychologueController::class, 'enregistrerDiagnosticPsychologique']);
@@ -155,4 +165,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/patients/{idPatient}/compte-rendu-seance', [PsychologueController::class, 'redigerCompteRenduSeance']);
         Route::post('/patients/{idPatient}/note-sociale', [PsychologueController::class, 'ajouterNoteSociale']);
     });
+});
+
+// routes/api.php
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/orthanc/patients/{patient_id}/studies', [OrthancController::class, 'getPatientStudies']);
+    Route::get('/orthanc/studies/{study_id}', [OrthancController::class, 'getStudyDetails']);
+    Route::get('/orthanc/patients/search', [OrthancController::class, 'searchPatients']);
+    Route::post('/orthanc/upload', [OrthancController::class, 'uploadDicom']);
+    Route::post('/orthanc/examens-imagerie', [OrthancController::class, 'examenImagerie']);
+});
+
+Route::middleware('auth:sanctum')->get('/test-auth', function (Request $request) {
+    return response()->json(['user' => $request->user()]);
 });

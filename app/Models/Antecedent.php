@@ -11,11 +11,11 @@ class Antecedent extends Model
     protected $keyType = 'string';
     public $incrementing = false;
 
-    protected $fillable = ['id', 'id_patient', 'lien_parente', 'maladie', 'age_apparition', 'deces'];
+    protected $fillable = ['id', 'dossiers_soins_medicaux'];
 
-    public function patient()
+    public function dossierSoinsMedicaux()
     {
-        return $this->belongsTo(Patient::class, 'id_patient');
+        return $this->belongsTo(DossierSoinsMedicaux::class, 'dossiers_soins_medicaux');
     }
 
     public function allergies()

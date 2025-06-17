@@ -10,6 +10,7 @@ class DossierSoinsInfirmier extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table ='dossiers_soins_infirmiers';
 
     protected $fillable = ['id', 'id_dossier'];
 

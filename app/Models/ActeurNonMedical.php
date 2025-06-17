@@ -10,6 +10,7 @@ class ActeurNonMedical extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table ='acteurs_non_medicaux';
 
     protected $fillable = ['id', 'id_user', 'id_service', 'role', 'numero_adeli'];
 

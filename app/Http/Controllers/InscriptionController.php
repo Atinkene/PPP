@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActeurNonMedical;
 use App\Models\Patient;
+use App\Models\ProfessionnelSante;
 use App\Models\User;
 use App\Services\ServiceRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-// Contrôleur pour gérer l'inscription
 class InscriptionController extends Controller
 {
     protected $serviceRole;
@@ -19,9 +20,9 @@ class InscriptionController extends Controller
         $this->serviceRole = $serviceRole;
     }
 
-    // Inscription d'un nouvel utilisateur
     public function inscrire(Request $request)
     {
+        $nonMedicalRoles = ['personnel_administratif'];
         $request->validate([
             'email' => 'required|email|unique:users',
             'mot_de_passe' => 'required|min:6',
@@ -55,13 +56,28 @@ class InscriptionController extends Controller
             'role' => $request->role,
         ]);
 
-        $this->serviceRole->assignerRole($utilisateur, $request->role);
-
         if ($request->role === 'patient') {
             Patient::create([
                 'id' => Str::uuid(),
                 'id_user' => $utilisateur->id,
-                'groupe_sanguin' => $utilisateur->groupe_sanguin,
+                'groupe_sanguin' => $request->groupe_sanguin,
+            ]);
+        } elseif (in_array($request->role, $nonMedicalRoles)) {
+            ActeurNonMedical::create([
+                'id' => Str::uuid(),
+                'id_user' => $utilisateur->id,
+                'role' => $request->role,
+                'numero_adeli' => $request->numero_adeli,
+                'id_service' => 'f4cf014e-eb9a-47d6-9712-764afeb26436',
+            ]);
+        } else {
+            ProfessionnelSante::create([
+                'id' => Str::uuid(),
+                'id_user' => $utilisateur->id,
+                'type' => $request->role,
+                'numero_rpps' => $request->numero_rpps,
+                'specialite' => $request->specialite,
+                'id_service' => 'f4cf014e-eb9a-47d6-9712-764afeb26436',
             ]);
         }
 
@@ -70,7 +86,7 @@ class InscriptionController extends Controller
         return response()->json([
             'message' => 'Utilisateur inscrit',
             'utilisateur' => $utilisateur,
-            'jeton_acces' => $jeton,
+            'token' => $jeton,
             'type_jeton' => 'Bearer'
         ], 201);
     }

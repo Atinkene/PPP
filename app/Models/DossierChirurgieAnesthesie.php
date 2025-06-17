@@ -10,6 +10,7 @@ class DossierChirurgieAnesthesie extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table ='dossiers_chirurgie_anesthesie';
 
     protected $fillable = ['id', 'id_dossier'];
 

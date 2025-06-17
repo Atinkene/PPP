@@ -10,6 +10,7 @@ class AdministrationMedicament extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table ='administration_medicaments';
 
     protected $fillable = [
         'id', 'id_medicament', 'id_dossier_infirmier',

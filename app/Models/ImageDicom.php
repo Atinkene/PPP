@@ -10,6 +10,7 @@ class ImageDicom extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table ='images_dicom';
 
     protected $fillable = [
         'id', 'id_examen_imagerie', 'orthanc_instance_id',

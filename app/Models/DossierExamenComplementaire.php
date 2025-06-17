@@ -12,6 +12,7 @@ class DossierExamenComplementaire extends Model
     public $incrementing = false;
 
     protected $fillable = ['id', 'id_dossier'];
+    protected $table = 'dossiers_examens_complementaires';
 
     public function dossier()
     {

@@ -8,6 +8,7 @@ class ServiceHospitalier extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table ='services_hospitaliers';
 
     protected $fillable = ['id', 'id_etablissement', 'nom', 'chef_service'];
 

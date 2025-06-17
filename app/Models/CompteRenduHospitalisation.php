@@ -10,6 +10,7 @@ class CompteRenduHospitalisation extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table ='comptes_rendus_hospitalisation';
 
     protected $fillable = ['id', 'id_dossier_admission', 'diagnostic_principal', 'diagnostics_associes'];
 

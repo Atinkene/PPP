@@ -1,67 +1,99 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# PPP Project - Backend
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Ce dépôt contient le backend du projet PPP, une API Laravel pour la gestion des dossiers patients médicaux et l’intégration avec Orthanc pour la gestion des images DICOM.
 
-## About Laravel
+## Prérequis
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP >= 8.1
+- Composer
+- MySQL ou PostgreSQL
+- Orthanc (serveur DICOM)
+- [Optionnel] Redis (pour les files d’attente)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Installation
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. Clonez le dépôt :
 
-## Learning Laravel
+   ```bash
+   git clone https://github.com/votre-utilisateur/ppp-back.git
+   cd ppp-back
+   ```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+2. Installez les dépendances PHP :
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+   ```bash
+   composer install
+   ```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+3. Copiez le fichier d’exemple d’environnement et configurez-le :
 
-## Laravel Sponsors
+   ```bash
+   cp .env.example .env
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+   Modifiez les variables suivantes dans `.env` :
+   - `DB_*` pour la base de données
+   - `ORTHANC_URL` pour l’URL de votre serveur Orthanc
 
-### Premium Partners
+4. Générez la clé d’application Laravel :
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+   ```bash
+   php artisan key:generate
+   ```
 
-## Contributing
+5. Lancez les migrations et (optionnel) les seeders :
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+   ```bash
+   php artisan migrate
+   # php artisan db:seed
+   ```
 
-## Code of Conduct
+## Lancement du serveur
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+php artisan serve
+```
 
-## Security Vulnerabilities
+L’API sera accessible sur [http://localhost:8000](http://localhost:8000).
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Endpoints principaux
 
-## License
+- `POST /api/login` : Authentification
+- `GET /api/dossiers/{id}` : Récupérer un dossier patient (avec sous-dossiers)
+- `POST /api/examens-imagerie` : Créer un examen d’imagerie
+- `POST /api/dicom/upload` : Uploader une image DICOM (envoie à Orthanc et sauvegarde en base)
+- Autres endpoints pour admissions, consultations, etc.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# PPP
+## Intégration Orthanc
+
+- L’API `/api/dicom/upload` reçoit un fichier DICOM, l’envoie à Orthanc (`POST /instances`), puis sauvegarde les IDs Orthanc et les métadonnées dans la base.
+- Configurez l’URL Orthanc dans `.env` (`ORTHANC_URL=http://localhost:8042`).
+
+## Structure du projet
+
+- `app/Models/` : Modèles Eloquent (DossierPatient, ExamenImagerie, ImageDicom, etc)
+- `app/Http/Controllers/` : Contrôleurs API
+- `routes/api.php` : Définition des routes API
+- `database/migrations/` : Migrations de la base
+
+## Tests
+
+```bash
+php artisan test
+```
+
+## Contribution
+
+1. Forkez le projet
+2. Créez une branche (`git checkout -b feature/ma-feature`)
+3. Commitez vos modifications (`git commit -am 'Ajout de ma feature'`)
+4. Pushez la branche (`git push origin feature/ma-feature`)
+5. Ouvrez une Pull Request
+
+## Licence
+
+MIT
+
+---
+
+**Contact** : Atinkene

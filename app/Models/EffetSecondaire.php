@@ -10,6 +10,7 @@ class EffetSecondaire extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table ='effets_secondaires';
 
     protected $fillable = ['id', 'id_traitement', 'id_medicament', 'nom', 'date'];
 

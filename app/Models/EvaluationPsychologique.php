@@ -10,6 +10,7 @@ class EvaluationPsychologique extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table ='evaluations_psychologiques';
 
     protected $fillable = ['id', 'id_dossier_psycho', 'date', 'diagnostic', 'suivi', 'id_acteur'];
 

@@ -10,6 +10,7 @@ class DossierAdmissionSejour extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table ='dossiers_admission_sejour';
 
     protected $fillable = ['id', 'id_dossier'];
 

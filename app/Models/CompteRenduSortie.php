@@ -10,6 +10,7 @@ class CompteRenduSortie extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table = 'comptes_rendus_sortie';
 
     protected $fillable = [
         'id', 'id_dossier_sortie', 'date', 'instructions',

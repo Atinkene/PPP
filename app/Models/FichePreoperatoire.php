@@ -10,6 +10,7 @@ class FichePreoperatoire extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table ='fiches_preoperatoires';
 
     protected $fillable = ['id', 'id_dossier_chirurgie', 'date', 'nom'];
 

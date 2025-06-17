@@ -1,16 +1,12 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Validation\ValidationException;
 
-// Contrôleur pour gérer l'authentification
 class AuthController extends Controller
 {
-    // Connexion de l'utilisateur
     public function connecter(Request $request)
     {
         $request->validate([
@@ -21,18 +17,25 @@ class AuthController extends Controller
         $utilisateur = User::where('email', $request->email)->first();
 
         if (!$utilisateur || !Hash::check($request->mot_de_passe, $utilisateur->password)) {
-            return response()->json(['erreur' => 'Identifiants invalides'], 401);
+            throw ValidationException::withMessages([
+                'email' => ['Les identifiants fournis sont incorrects.'],
+            ]);
         }
 
+        // Indiquer le rôle dans la réponse peut être utile
+        $role = $utilisateur->role;
         $jeton = $utilisateur->createToken('jeton_auth')->plainTextToken;
 
-        return response()->json(['jeton_acces' => $jeton, 'type_jeton' => 'Bearer']);
+        return response()->json([
+            'token' => $jeton,
+            'type_jeton' => 'Bearer',
+            'utilisateur' => $utilisateur->only(['id', 'nom', 'prenom', 'email', 'role']),
+        ]);
     }
 
-    // Déconnexion de l'utilisateur
     public function deconnecter(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Déconnecté']);
+        return response()->json(['message' => 'Déconnecté avec succès']);
     }
 }

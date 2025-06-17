@@ -10,6 +10,7 @@ class TraitementLongueDuree extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table ='traitements_longue_duree';
 
     protected $fillable = ['id', 'id_antecedent', 'nom'];
 

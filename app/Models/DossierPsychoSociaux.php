@@ -10,6 +10,7 @@ class DossierPsychoSociaux extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table ='dossiers_psycho_sociaux';
 
     protected $fillable = ['id', 'id_dossier'];
 

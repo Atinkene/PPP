@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class DossierPatient extends Model
 {
     protected $keyType = 'string';
+    protected $table = 'dossiers_patients';
     public $incrementing = false;
 
     protected $fillable = ['id', 'id_patient', 'id_etablissement'];
@@ -61,5 +62,9 @@ class DossierPatient extends Model
     public function dossierPsychoSociaux()
     {
         return $this->hasOne(DossierPsychoSociaux::class, 'id_dossier');
+    }
+    public function rendezVous()
+    {
+        return $this->hasMany(RendezVous::class, 'id_dossier_patient');
     }
 }

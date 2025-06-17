@@ -20,6 +20,10 @@ class User extends Authenticatable
         'lieu_naissance', 'nationalite', 'adresse_postale', 'numero_telephone',
         'login', 'password','role',
     ];
+    
+    protected $casts = [
+        'date_naissance' => 'date',
+    ];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -52,5 +56,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(ContactUrgence::class, 'id_user_contact');
     }
+    // App\Models\User.php
+
+public function hasRole($role)
+{
+    return $this->role === $role;
+}
+
     
 }

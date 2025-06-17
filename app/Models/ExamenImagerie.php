@@ -10,6 +10,7 @@ class ExamenImagerie extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table = 'examens_imagerie';
 
     protected $fillable = [
         'id', 'id_dossier_examen', 'type', 'resultat', 'dicom_instance_id',

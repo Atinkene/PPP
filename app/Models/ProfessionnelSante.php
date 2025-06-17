@@ -10,10 +10,11 @@ class ProfessionnelSante extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table = 'professionnels_sante';
 
     protected $fillable = ['id', 'id_user', 'id_service', 'numero_rpps', 'type', 'specialite'];
 
-    public function user()
+    public function user() 
     {
         return $this->belongsTo(User::class, 'id_user');
     }

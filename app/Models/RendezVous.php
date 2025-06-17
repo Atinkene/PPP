@@ -10,15 +10,16 @@ class RendezVous extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table = 'rendez_vous';
 
     protected $fillable = [
-        'id', 'id_patient', 'id_professionnel', 'id_service',
+        'id', 'id_dossier_patient', 'id_professionnel', 'id_service',
         'id_etablissement', 'date', 'type', 'statut'
     ];
 
-    public function patient()
+    public function dossierPatient()
     {
-        return $this->belongsTo(Patient::class, 'id_patient');
+        return $this->belongsTo(DossierPatient::class, 'id_dossier_patient');
     }
 
     public function professionnel()

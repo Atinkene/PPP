@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Antecedent;
+use App\Models\Patient;
 use App\Models\Consentement;
 use App\Models\DossierPatient;
 use App\Models\Medicament;
 use App\Models\RendezVous;
+use App\Models\ExamenImagerie;
+use App\Models\CompteRenduSortie;
 use Illuminate\Http\Request;
 
 // Contrôleur pour les fonctionnalités du Patient
@@ -28,6 +31,7 @@ class PatientController extends Controller
             'date' => $request->date,
             'type' => $request->type,
             'statut' => 'en_attente',
+            'id_dossier_patient' => $request->id_dossier_patient,
         ]);
 
         return response()->json($rendezVous);
@@ -137,4 +141,27 @@ class PatientController extends Controller
         // Logique pour enregistrer l'évaluation
         return response()->json(['message' => 'Évaluation enregistrée']);
     }
+
+
+    public function getDossierActifPatient($id_user)
+    {
+        $idPatient = Patient::where('id_user', $id_user)->value('id');
+        $dossier = DossierPatient::where('id_patient', $idPatient)->first();
+        return response()->json($dossier);
+    }
+
+    public function mettreAJourRendezVous($idrv, Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date',
+        ]);
+
+        $rendezVous = RendezVous::findOrFail($idRv);
+        $rendezVous->update([
+            'date' => $request->date,
+        ]);
+
+        return response()->json($rendezVous);
+    }
+    
 }

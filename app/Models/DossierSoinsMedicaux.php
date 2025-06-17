@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class DossierSoinsMedicaux extends Model
 {
     protected $keyType = 'string';
+    protected $table = 'dossiers_soins_medicaux';
     public $incrementing = false;
 
     protected $fillable = ['id', 'id_dossier'];

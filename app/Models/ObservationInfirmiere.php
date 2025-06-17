@@ -10,6 +10,7 @@ class ObservationInfirmiere extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table ='observations_infirmieres';
 
     protected $fillable = ['id', 'id_dossier_infirmier', 'date', 'etat_general', 'id_professionnel'];
 

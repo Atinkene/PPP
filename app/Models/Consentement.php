@@ -11,10 +11,10 @@ class Consentement extends Model
     protected $keyType = 'string';
     public $incrementing = false;
 
-    protected $fillable = ['id', 'type', 'statut', 'date_autorisation'];
+    protected $fillable = ['id', 'type', 'statut', 'date_autorisation', 'id_dossier_admin'];
 
     public function dossierAdministratif()
     {
-        return $this->hasOne(DossierAdministratif::class, 'id_consentement');
+        return $this->belongsTo(DossierAdministratif::class, 'id_dossier_admin');
     }
 }

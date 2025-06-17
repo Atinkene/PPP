@@ -10,6 +10,7 @@ class DossierSortieSuivi extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table = 'dossiers_sortie_suivi';
 
     protected $fillable = ['id', 'id_dossier'];
 

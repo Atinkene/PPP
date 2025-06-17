@@ -10,8 +10,8 @@ class DossierAdministratif extends Model
 {
     protected $keyType = 'string';
     public $incrementing = false;
-
-    protected $fillable = ['id', 'id_dossier', 'id_contact', 'id_assurance', 'id_consentement'];
+    protected $table ='dossiers_administratifs';
+    protected $fillable = ['id', 'id_dossier', 'id_contact'];
 
     public function dossier()
     {
@@ -23,13 +23,22 @@ class DossierAdministratif extends Model
         return $this->belongsTo(Contact::class, 'id_contact');
     }
 
-    public function assurance()
+    public function assurances()
     {
-        return $this->belongsTo(Assurance::class, 'id_assurance');
+        return $this->hasMany(Assurance::class, 'id_dossier_admin');
     }
 
-    public function consentement()
+    public function consentements()
     {
-        return $this->belongsTo(Consentement::class, 'id_consentement');
+        return $this->hasMany(Consentement::class, 'id_dossier_admin');
     }
+    public function antecedents()
+    {
+        return $this->hasMany(Antecedents::class, 'id_dossier_admin');
+    }
+    public function contactsUrgences()
+    {
+        return $this->hasMany(ContactUrgence::class, 'id_dossier_admin');
+    }
+    
 }

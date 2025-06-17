@@ -106,14 +106,10 @@ return new class extends Migration
         // Table: antecedents
         Schema::create('antecedents', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('id_patient');
-            $table->string('lien_parente', 50)->nullable();
-            $table->string('maladie');
-            $table->integer('age_apparition')->nullable();
-            $table->boolean('deces')->default(false);
+            $table->uuid('id_dossier_soin');
             $table->timestamps();
-            $table->foreign('id_patient')->references('id')->on('patients')->onDelete('cascade');
-            $table->index(['id_patient']);
+            $table->foreign('id_dossier_soin')->references('id')->on('dossiers_soins_medicaux')->onDelete('cascade');
+            $table->index(['id_dossier_soin']);
         });
 
         // Table: allergies
@@ -132,27 +128,33 @@ return new class extends Migration
             $table->string('numero_telephone', 20)->nullable();
             $table->string('email')->nullable();
             $table->timestamps();
+            $table->uuid('id_dossier_admin');
+            $table->foreign('id_dossier_admin')->references('id')->on('dossiers_administratifs')->onDelete('cascade');
             $table->index(['id']);
         });
 
         // Table: assurances
         Schema::create('assurances', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('id_dossier_admin');
             $table->string('numero_securite_social', 15)->nullable();
             $table->string('organisme_assurance_sante', 50)->nullable();
             $table->decimal('prise_en_charge', 5, 2)->nullable();
+            $table->foreign('id_dossier_admin')->references('id')->on('dossiers_administratifs')->onDelete('cascade');
             $table->timestamps();
-            $table->index(['id']);
+            $table->index(['id', 'id_dossier_admin']);
         });
 
         // Table: consentements
         Schema::create('consentements', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('type', 50);
+            $table->uuid('id_dossier_admin');
             $table->string('statut', 20);
             $table->timestamp('date_autorisation')->nullable();
+            $table->foreign('id_dossier_admin')->references('id')->on('dossiers_administratifs')->onDelete('cascade');
             $table->timestamps();
-            $table->index(['id']);
+            $table->index(['id','id_dossier_admin_consent']);
         });
 
         // Table: dossiers_administratifs
@@ -164,10 +166,8 @@ return new class extends Migration
             $table->uuid('id_consentement');
             $table->timestamps();
             $table->foreign('id_dossier')->references('id')->on('dossiers_patients')->onDelete('cascade');
-            $table->foreign('id_contact')->references('id')->on('contacts')->onDelete('cascade');
-            $table->foreign('id_assurance')->references('id')->on('assurances')->onDelete('cascade');
-            $table->foreign('id_consentement')->references('id')->on('consentements')->onDelete('cascade');
-            $table->index(['id_dossier', 'id_contact', 'id_assurance', 'id_consentement'],  'dossier_admin_idx');
+            // $table->foreign('id_contact')->references('id')->on('contacts')->onDelete('cascade');
+            $table->index(['id_dossier', 'id_contact'],  'dossier_admin_idx');
         });
 
         // Table: dossiers_admission_sejour
@@ -253,7 +253,7 @@ return new class extends Migration
         // Table: rendez_vous
         Schema::create('rendez_vous', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('id_patient');
+            $table->uuid('id_dossier_patient');
             $table->uuid('id_professionnel')->nullable();
             $table->uuid('id_service')->nullable();
             $table->uuid('id_etablissement');
@@ -261,7 +261,7 @@ return new class extends Migration
             $table->string('type');
             $table->string('statut')->default('planifié');
             $table->timestamps();
-            $table->foreign('id_patient')->references('id')->on('patients')->onDelete('cascade');
+            $table->foreign('id_dossier_patient')->references('id')->on('dossiers_patients')->onDelete('cascade');
             $table->foreign('id_professionnel')->references('id')->on('professionnels_sante')->onDelete('set null');
             $table->foreign('id_service')->references('id')->on('services_hospitaliers')->onDelete('set null');
             $table->foreign('id_etablissement')->references('id')->on('etablissements')->onDelete('cascade');
@@ -422,16 +422,16 @@ return new class extends Migration
         // Table: contacts_urgence
         Schema::create('contacts_urgence', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('id_patient');
+            $table->uuid('id_dossier_admin');
             $table->string('lien_parente', 50)->nullable();
             $table->string('cause')->nullable();
             $table->timestamp('date')->nullable();
             $table->boolean('est_joint')->default(false);
             $table->uuid('id_user_contact')->nullable();
             $table->timestamps();
-            $table->foreign('id_patient')->references('id')->on('patients')->onDelete('cascade');
+            $table->foreign('id_dossier_admin')->references('id')->on('dossiers_administratifs')->onDelete('cascade');
             $table->foreign('id_user_contact')->references('id')->on('users')->onDelete('set null');
-            $table->index(['id_patient', 'id_user_contact'],'PatCont_idx');
+            $table->index(['id_dossier_admin', 'id_user_contact'],'PatCont_idx');
         });
 
         // Table: dossiers_chirurgie_anesthesie
